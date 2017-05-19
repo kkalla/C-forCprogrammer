@@ -4,7 +4,7 @@
 #include <array>
 #include <vector>
 
-
+using namespace std;
 const int size = 50;
 
 double prob(){
@@ -30,7 +30,7 @@ class Graph{
 			for(int i=0;i<size;++i){
 				for(int j=i;j<size;++j){
 					if(deges[i][j]) costs[i][j]=costs[j][i]=
-						rand()%10 +1;
+						static_cast<double>(rand()%10 +1);
 				}
 			}
 		}
@@ -45,8 +45,8 @@ class Graph{
 			return count;
 		}
 		bool adjacent(Graph G,int x, int y){return G.edges[x][y];}
-		vector<int> neighbors(Graph G,int x){
-			vector<int> neighbors;
+		vector<double> neighbors(Graph G,int x){
+			vector<double> neighbors;
 			int size = G.edges[x].size();
 			for(int i=0;i<size;++i){
 				if(G.edges[x][i]) neighbors.push_back(i);
@@ -60,22 +60,69 @@ class Graph{
 		double** costs;
 };
 
-
-void GenerateGraph(bool** graph,int size,double density){
-	srand(time(0)); //seed rand()
-	//heap created 2D array of Bool
-	graph = new bool*[size];
-	for(int i=0;i<size;++i)
-		graph[i] = new bool[size];
-
-	for(int i=0;i<size;++i){
-		for(int j=i;j<size;++j){
-			if(i==j) graph[i][j]=false;
-			else graph[i][j]=graph[j][i] = (prob()<density);
-		}
+void siftDown(vector<double> pq,int i){
+	int size = pq.size();
+	int minindex = i;
+	int l = 2*i+1;
+	if(l<=size-1 && pq[l]<pq[minindex]) minindex = l;
+	int r = 2*i +2;
+	if(r<=size-1 && pq[r]<pq[minindex]) minindex = r;
+	if(i!=minindex){
+		swap(pq[i],pq[minindex]);
+		siftDown(pq,minindex);
 	}
-
 }
+
+void siftUp(vector<double> pq,int i){
+	while(i>0 && pq[(i-1)/2]<pq[i]){
+		swap(pq[(i-1)/2],pq[i]);
+		i = (i-1)/2;
+	}
+}
+
+class PriorityQueue{
+	private:
+		vector<double> pq;
+		int size=0;
+	public:
+		PriorityQueue(double a[]){
+			size = a.size();
+			for(int i=0;i<size;++i)
+				this.insert(a[i]);
+		}
+		void chgPriority(int i,double priority){
+			pq[i]=priority;
+		}
+		double minPriority(){
+			double result;
+			result = pq[0];
+			pq[0] = pq[size-1];
+			pq.pop_back();
+			size -=1;
+			siftDown(pq,0);
+			return result;
+		}
+		bool contains(double elt){
+			for(int i=0;i<size;++i){
+				if(elt<pq[i]) return false;break;
+				else if(elt==pq[i]) return true;
+				else return false;
+			}
+		}
+		void insert(double elt){
+			pq.push_back(elt);
+			size +=1;
+			siftUp(pq,size-1);
+		}
+		double top(){return pq[0];}
+		int size(){return size;}
+
+
+};
+
+class ShortestPath{
+	
+};
 
 int main(){
 
